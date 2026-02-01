@@ -1,0 +1,59 @@
+name: Soroban Smart Contracts — Tests & Coverage
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+
+    - name: Install Rust target for Soroban
+      run: |
+        source $HOME/.cargo/env
+        rustup target add wasm32v1-none
+
+    - name: Install cargo-llvm-cov
+      run: |
+        source $HOME/.cargo/env
+        cargo install cargo-llvm-cov
+
+    - name: Run tests with coverage
+      run: |
+        source $HOME/.cargo/env
+        cargo llvm-cov test
+
+    - name: Generate LCOV coverage report
+      run: |
+        source $HOME/.cargo/env
+        cargo llvm-cov test --lcov --output-path=coverage/lcov.info
+
+    - name: Generate HTML coverage report
+      run: |
+        source $HOME/.cargo/env
+        cargo llvm-cov test --html --output-dir=coverage/html
+
+    - name: Upload LCOV report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lcov-report
+        path: coverage/lcov.info
+
+    - name: Upload HTML report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-report
+        path: coverage/html/
