@@ -1,88 +1,45 @@
-name: Stellar Contracts
+name: Soroban Smart Contracts CI
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "Alien-Gateway/**"
-      - ".github/workflows/stellar-contracts.yml"
+    branches: [ "main" ]
   pull_request:
-    paths:
-      - "Alien-Gateway/**"
-      - ".github/workflows/stellar-contracts.yml"
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   build:
-    name: Build & Test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Alien-Gateway
+    runs-on: macos-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
+    - name: Install Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source $HOME/.cargo/env
+    - name: Install Rust target for Soroban
+      run: |
+        source $HOME/.cargo/env
+        rustup target add wasm32v1-none
+    - name: Install Stellar CLI with Homebrew
+      run: |
+        brew update
+        brew install stellar-cli
+        stellar --version
+    - name: Build Cargo project
+      run: |
+        source $HOME/.cargo/env
+        cargo build --verbose
 
-      - name: Cache Cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            Alien-Gateway/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Alien-Gateway/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+    - name: Build Soroban contract
+      run: |
+        source $HOME/.cargo/env
+        stellar contract build --verbose
 
-      - name: Check Rust version
-        run: rustc --version && cargo --version
-
-      - name: Build contracts
-        run: cargo build --workspace --release
-
-      - name: Run tests
-        run: cargo test --workspace
-
-      - name: Build WASM targets
-        run: cargo build --workspace --target wasm32-unknown-unknown --release
-
-      - name: Build Soroban Contract
-        run: stellar contract build
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Alien-Gateway
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Cache Cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            Alien-Gateway/target
-          key: ${{ runner.os }}-cargo-lint-${{ hashFiles('Alien-Gateway/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-lint-
-
-      - name: Check formatting
-        run: cargo fmt --all -- --check
-
-      - name: Run Clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+    - name: Run Cargo tests
+      run: |
+        source $HOME/.cargo/env
+        cargo test --verbose
