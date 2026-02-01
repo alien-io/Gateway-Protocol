@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  ci:
     runs-on: macos-latest
 
     steps:
@@ -32,6 +32,11 @@ jobs:
         brew install stellar-cli
         stellar --version
 
+    - name: Install cargo-llvm-cov
+      run: |
+        source $HOME/.cargo/env
+        cargo install cargo-llvm-cov
+
     - name: Build Soroban contract
       run: |
         source $HOME/.cargo/env
@@ -42,41 +47,16 @@ jobs:
         source $HOME/.cargo/env
         cargo test --verbose
 
-  test:
-    runs-on: macos-latest
-    needs: build
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install Rust
-      run: |
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source $HOME/.cargo/env
-
-    - name: Install Rust target for Soroban
-      run: |
-        source $HOME/.cargo/env
-        rustup target add wasm32v1-none
-
-    - name: Install cargo-llvm-cov
-      run: |
-        source $HOME/.cargo/env
-        cargo install cargo-llvm-cov
-
-    - name: Create coverage output directory
-      run: mkdir -p coverage/html
-
     - name: Run tests and collect coverage data
       run: |
         source $HOME/.cargo/env
+        mkdir -p coverage/html
         cargo llvm-cov test --no-report
 
     - name: Generate coverage stats
       run: |
         source $HOME/.cargo/env
         cargo llvm-cov report
-
 
     - name: Generate HTML coverage report
       run: |
