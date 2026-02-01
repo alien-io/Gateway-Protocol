@@ -4,20 +4,23 @@ on:
   push:
     branches: [main]
     paths:
-      - "Alien-Gateway/**"
+      - "**/*.rs"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
       - ".github/workflows/stellar-contracts.yml"
   pull_request:
     paths:
-      - "Alien-Gateway/**"
+      - "**/*.rs"
+      - "**/Cargo.toml"
+      - "**/Cargo.lock"
       - ".github/workflows/stellar-contracts.yml"
 
 jobs:
   build:
     name: Build & Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Alien-Gateway
+    # No working-directory override needed.
+    # actions/checkout already places the repo at the runner root.
 
     steps:
       - name: Checkout repository
@@ -34,13 +37,21 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            Alien-Gateway/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Alien-Gateway/Cargo.lock') }}
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Check Rust version
-        run: rustc --version && cargo --version
+      - name: Install Stellar CLI
+        run: |
+          curl -sSL https://install.stellar.org | bash
+          echo "$HOME/.stellar/bin" >> $GITHUB_PATH
+
+      - name: Check tool versions
+        run: |
+          rustc --version
+          cargo --version
+          stellar --version
 
       - name: Build contracts
         run: cargo build --workspace --release
@@ -57,9 +68,6 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Alien-Gateway
 
     steps:
       - name: Checkout repository
@@ -76,8 +84,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            Alien-Gateway/target
-          key: ${{ runner.os }}-cargo-lint-${{ hashFiles('Alien-Gateway/Cargo.lock') }}
+            target
+          key: ${{ runner.os }}-cargo-lint-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-lint-
 
