@@ -40,8 +40,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      # Install via cargo so the binary lands in ~/.cargo/bin,
-      # which is already on PATH thanks to dtolnay/rust-toolchain.
+      # libdbus-sys (pulled in by stellar-cli) requires these at compile time
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pkg-config libdbus-1-dev
+
       - name: Install Stellar CLI
         run: cargo install stellar-cli
 
