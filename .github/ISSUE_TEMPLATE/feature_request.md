@@ -1,31 +1,20 @@
-## 🐞 Issue Description
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
 
-<!-- Clearly and concisely describe the problem. -->
+---
 
-## 📋 Steps to Reproduce
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-1.
-2.
-3.
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-## 🤔 Expected Behavior
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-<!-- What did you expect to happen? -->
-
-## 😬 Actual Behavior
-
-<!-- What actually happened? -->
-
-## 🔗 Relevant Context / Screenshots
-
-<!-- Add any screenshots, logs, or links that could help. -->
-
-## 🛠 Environment
-
-- OS:
-- Browser/Version:
-- App Version (if relevant):
-
-## 📝 Additional Notes
-
-<!-- Any extra information that could help us resolve your issue. -->                       
+**Additional context**
+Add any other context or screenshots about the feature request here.
